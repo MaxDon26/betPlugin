@@ -1,26 +1,11 @@
-// import { url } from "inspector";
+import { createButton, createElement } from "./pages/popupFile";
+import { addCursorCircle, removeCursorCircle } from "./components/circle";
+import { channelAction } from "./api";
+
 import "./content.css";
-import Pusher from "pusher-js";
-import "./pages/popupFile";
 
-const pusher = new Pusher("a8b7b2f88f82155450ac", {
-  cluster: "eu",
-});
-
-const channel = pusher.subscribe("chat");
-channel.bind(
-  "new-message",
-  (data: { message: string; send: number; receive: number }) => {
-    data.receive = Date.now();
-    console.log(data, data.receive - data.send);
-
-    window.postMessage({ action: "requestData", data: data.message }, "*");
-  }
-);
-
-// Ловим сообщения от ejcet и пересылаем их в background.js
+// // Ловим сообщения от ejcet и пересылаем их в background.js
 window.addEventListener("message", (event) => {
-  // console.log(event.data);
   if (event.source !== window) return;
 
   if (!event.data || typeof event.data !== "object") return; // Добавил проверку
@@ -29,62 +14,137 @@ window.addEventListener("message", (event) => {
     removeCursorCircle();
     console.log(event.data);
     if (!event.data.data) return;
+    (
+      document.querySelector(`#${event.data.data}`) as HTMLButtonElement
+    ).classList.add("active");
+  }
 
-    //отправляем сообщение в background для сохранения и в popup
-    chrome.runtime.sendMessage({
-      action: "saveSelector",
-      selector: event.data.data,
-      url: window.location.href,
-    });
-  } else if (event.data.action === "activateSelector") {
-    console.log(event.data);
+  if (event.data.action === "accessSelector") {
+    (
+      document.querySelector(
+        `#${event.data.data.selector}`
+      ) as HTMLButtonElement
+    ).disabled = !event.data.data.success;
   }
 });
 
-//слушаем сообщения от popup
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "activateSelector") {
-    addCursorCircle();
+init();
 
-    //отправляем сообщение об активации режима в pupup
-    sendResponse({
-      status: "🔍 Режим селектора включен. Кликните на элемент.",
+let sumInput: null | HTMLInputElement = null;
+
+channelAction((message) => {
+  window.postMessage(
+    {
+      action: "requestData",
+      data: message,
+      meta: {
+        sumBet: sumInput?.value,
+      },
+    },
+    "*"
+  );
+});
+
+const trigger = (selector: "GOAL__P1" | "GOAL__P2" | "SUBMIT") => {
+  addCursorCircle();
+
+  window.postMessage({ action: "activateSelector", selector }, "*");
+};
+
+function generatePopup() {
+  document.addEventListener("DOMContentLoaded", () => {
+    const pupup = document.createElement("div");
+    pupup.id = "popup";
+    pupup.className = "pupup-container";
+    document.body.appendChild(pupup);
+
+    const containerButton = createElement("div", {
+      className: "container-btn",
     });
 
-    // прокидываем в inject скрипт сообщение для активации режима клика
-    window.postMessage(
-      { action: "activateSelector", selector: message.selector },
-      "*"
+    const labelOnlyP1 = createElement("label", {
+      htmlFor: "ONLY_P1",
+      textContent: "Только П1",
+    });
+    const onlyP1 = createElement("input", {
+      type: "checkbox",
+      id: "ONLY_P1",
+      className: "only-p1",
+    });
+
+    const goal1 = createButton("ГОЛ П1", {
+      id: "GOAL__P1",
+      onclick: () => trigger("GOAL__P1"),
+    });
+    const goal2 = createButton("ГОЛ П2", {
+      id: "GOAL__P2",
+      onclick: () => trigger("GOAL__P2"),
+    });
+
+    const clearBtn = createButton("Сбросить", {
+      onclick: () => {
+        window.postMessage({ action: "clearSelectors" }, "*");
+        [goal1, goal2].forEach((el) => {
+          el.disabled = false;
+          el.classList.remove("active");
+        });
+      },
+      className: "clear",
+    });
+
+    labelOnlyP1.append(onlyP1);
+
+    containerButton.append(labelOnlyP1);
+
+    sumInput = createElement("input", {
+      type: "number",
+      id: "SUM",
+      placeholder: "Сумма",
+      className: "input-sum",
+
+      onkeydown: (e) => {
+        if (e.key === "Enter") {
+          // console.log((e.target as HTMLInputElement)!.value);
+          window.postMessage(
+            { action: "setSum", data: (e.target as HTMLInputElement)!.value },
+            "*"
+          );
+        }
+      },
+    });
+
+    const labelSum = createElement("label", {
+      htmlFor: "SUM",
+      textContent: "Сумма ставки",
+      className: "label-sum",
+    });
+
+    const submit = createButton("Подтвердить", {
+      id: "confirmSum",
+      onclick: () =>
+        window.postMessage({ action: "setSum", data: sumInput?.value }, "*"),
+    });
+
+    const btnsOneClickContainer = createElement("div", {
+      className: "btns-one-click-container",
+    });
+
+    btnsOneClickContainer.append(
+      ...[5000, 10000, 15000].map((sum) =>
+        createButton(`${sum} руб`, {
+          onclick: () => {
+            window.postMessage({ action: "setSum", data: sum }, "*");
+          },
+          className: "btn-one-click",
+        })
+      )
     );
-  } else if (message.action === "requestData") {
-    console.log(message);
-    window.postMessage({ action: "requestData", data: message.selector }, "*");
-  }
-});
 
-let cursorCircle: HTMLDivElement | null = null;
-function addCursorCircle() {
-  if (cursorCircle) return; // Если кружок уже есть, не создаём новый
+    labelSum.append(sumInput, submit);
 
-  cursorCircle = document.createElement("div");
-  cursorCircle.id = "custom-cursor-circle";
-  document.body.appendChild(cursorCircle);
-
-  document.addEventListener("mousemove", moveCursorCircle);
-}
-
-function moveCursorCircle(event: MouseEvent) {
-  if (!cursorCircle) return;
-  cursorCircle.style.left = `${event.clientX}px`;
-  cursorCircle.style.top = `${event.clientY}px`;
-}
-
-function removeCursorCircle() {
-  if (cursorCircle) {
-    cursorCircle.remove();
-    cursorCircle = null;
-  }
-  document.removeEventListener("mousemove", moveCursorCircle);
+    pupup.append(containerButton, clearBtn, labelSum, btnsOneClickContainer);
+    containerButton.append(goal1, goal2);
+  });
 }
 
 function init() {
@@ -105,19 +165,9 @@ function init() {
   // Загружаем `injected.js` в контекст страницы
   injectScript("bookmakers/marathon.js");
   injectScript("bookmakers/fonbet.js");
+  injectScript("bookmakers/zenith.js");
+  injectScript("bookmakers/bookmaker.js");
   injectScript("bookmakers/inject.js");
 }
 
-init();
-
-document.addEventListener("DOMContentLoaded", () => {
-  const pupup = document.createElement("div");
-  pupup.id = "popup";
-  pupup.className = "pupup-container";
-  document.body.appendChild(pupup);
-
-  const script = document.createElement("script");
-  script.src = chrome.runtime.getURL("src/popup.js"); // Загружаем React код
-
-  document.body.appendChild(script);
-});
+generatePopup();

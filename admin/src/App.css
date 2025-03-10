@@ -1,0 +1,47 @@
+.admin-container {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.admin-title {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.button-group {
+  display: flex;
+
+  gap: 30px;
+  justify-content: space-between;
+}
+
+.admin-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 40px;
+
+  width: 100%;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+.admin-button.red {
+  background-color: #ff0000;
+}
+
+.admin-button:hover {
+  background-color: #0056b3;
+}
+
+.admin-button:active {
+  background-color: #003f7f;
+}

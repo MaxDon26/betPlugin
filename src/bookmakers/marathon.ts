@@ -1,15 +1,86 @@
-const maraphonSelector = (selector: HTMLElement) => {
-  return selector.closest("td");
-};
-
-const getSelectorByMeta = (meta: any) => {
-  if (!meta.coeffUuid) return null;
-
-  const lastDashIndex = meta.coeffUuid.lastIndexOf("-");
+function marathonRequest(element: any, meta: any) {
+  const isOneClick = (
+    document.querySelector('input[name="checked"]') as HTMLInputElement
+  )?.checked;
+  const lastDashIndex = element?.meta.lastIndexOf("-");
   const id =
     lastDashIndex !== -1
-      ? meta.coeffUuid.slice(0, lastDashIndex)
-      : meta.coeffUuid;
+      ? element?.meta.slice(0, lastDashIndex)
+      : element?.meta;
+  const now = new Date().getTime();
+  if (isOneClick) {
+    trySetInputValue("#b1c-stake", meta.sumBet, () => {
+      setTimeout(() => {
+        const saveSum = document.querySelector(
+          ".betslip-b1c__confirm"
+        ) as HTMLButtonElement;
 
-  return document.querySelector(`[data-coeff-uuid*='${id}']`);
-};
+        if (saveSum) saveSum.click();
+        const elementHTML = findElementByProps(
+          id,
+          ".price",
+          "coeffUuid",
+          [],
+          "dataset"
+        );
+        if (!elementHTML) return;
+        const time = new Date().getTime() - now;
+        console.log(time);
+        elementHTML.focus();
+        elementHTML?.click();
+      }, 0);
+    });
+  } else {
+    const elementHTML = findElementByProps(
+      id,
+      ".price",
+      "coeffUuid",
+      [],
+      "dataset"
+    );
+    if (!elementHTML) return;
+
+    elementHTML?.click();
+    trySetInputValue(".input-content input", meta.sumBet, () => {
+      const submitBtn = document.querySelector(
+        ".betslip-controls__placebet"
+      ) as HTMLButtonElement;
+
+      if (submitBtn) submitBtn.click();
+    });
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const waitForElement = (selector: string, timeout = 5000, interval = 200) => {
+    return new Promise((resolve, reject) => {
+      const startTime = Date.now();
+
+      const checkElement = () => {
+        const element = document.querySelector(selector);
+
+        if (element) {
+          resolve(element);
+        } else if (Date.now() - startTime >= timeout) {
+          reject(new Error(`Элемент не найден за ${timeout / 1000} секунд`));
+        } else {
+          setTimeout(checkElement, interval);
+        }
+      };
+
+      checkElement();
+    });
+  };
+
+  waitForElement("#bet-in-one-click-checked")
+    .then((element) => {
+      (element as HTMLInputElement).click();
+
+      waitForElement("#betPlacingModeRadio_Any")
+        .then((element) => {
+          (element as HTMLInputElement).click();
+        })
+        .catch((error) => console.error(error.message));
+    })
+    .catch((error) => console.error(error.message));
+});

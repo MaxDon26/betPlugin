@@ -17,6 +17,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
+
+  flex-direction: column;
+
+  gap: 10px;
   background-color: rgb(255, 255, 255);
 
   border-radius: 8px;
@@ -47,7 +51,7 @@ h3 {
   background-color: #1a3da8;
   color: white;
   border: none;
-  padding: 10px 15px;
+  padding: 40px 45px;
   margin: 5px 0;
   border-radius: 5px;
   cursor: pointer;
@@ -66,9 +70,9 @@ h3 {
   transform: scale(0.98);
 }
 
-.container {
+.container-btn {
   display: flex;
-  flex-direction: column;
+  gap: 10px;
   align-items: center;
 }
 
@@ -77,12 +81,17 @@ h3 {
   width: 100%;
 }
 
-.saved-elements button {
+.container-btn button {
   background-color: #4a69bd;
   font-weight: bold;
+  font-size: 24px;
 }
 
-.saved-elements button.active {
+.container-btn button.active:disabled {
+  background-color: #63666c;
+}
+
+.container-btn button.active {
   background-color: #02fd9c;
   font-weight: bold;
 }
@@ -91,7 +100,7 @@ h3 {
   background-color: #3659b1;
 }
 
-.clear {
+.pupup-container .clear {
   margin-top: 10px;
   width: 100%;
   background-color: #f44336;
@@ -127,4 +136,32 @@ h3 {
 .saved-element button {
   /* margin-right: 5px; */
   flex-grow: 1;
+}
+.input-sum {
+  width: 100%;
+  padding: 20px 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  font-size: 18px;
+  margin-top: 10px;
+}
+.label-sum {
+  font-weight: bold;
+  margin-bottom: 5px;
+  text-align: start;
+
+  width: 100%;
+}
+
+.btns-one-click-container {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  width: 100%;
+}
+.pupup-container .btn-one-click {
+  padding: 25px;
+  font-weight: 700;
+  font-size: 24px;
 }
