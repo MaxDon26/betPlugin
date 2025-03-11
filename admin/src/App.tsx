@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./App.css"; // Подключаем стили
 
 const Admin: React.FC = () => {
@@ -14,6 +14,14 @@ const Admin: React.FC = () => {
       console.error("❌ Ошибка отправки команды:", error);
     }
   };
+
+  useEffect(() => {
+    const clear = setInterval(() => {
+      fetch("http://localhost:5000/ping");
+    }, 3000);
+
+    return () => clearInterval(clear);
+  }, []);
 
   return (
     <div className="admin-container">

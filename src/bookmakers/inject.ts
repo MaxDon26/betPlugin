@@ -35,37 +35,76 @@ const checkSelectors = () => {
 
     switch (window.location.host) {
       case "www.marathonbet.ru": {
-        const lastDashIndex = elementData?.meta.lastIndexOf("-");
+        const lastDashIndex = elementData?.meta.factorId.lastIndexOf("-");
         const id =
           lastDashIndex !== -1
-            ? elementData?.meta.slice(0, lastDashIndex)
-            : elementData?.meta;
-        isSuccess = !!findElementByProps(
-          id,
-          ".price",
-          "coeffUuid",
-          [],
-          "dataset"
-        );
+            ? elementData?.meta.factorId.slice(0, lastDashIndex)
+            : elementData?.meta.factorId;
+        const el = document.querySelector(
+          `[data-coeff-uuid*="${id}"]`
+        ) as HTMLElement;
+
+        if (!el?.classList.contains("selectedBet")) {
+          el?.classList.add("selectedBet");
+          const keyEl = document.createElement("div");
+
+          keyEl.id = "key";
+          keyEl.textContent = selectorKey;
+          el?.appendChild(keyEl);
+        }
+
+        isSuccess = !!el;
+
         break;
       }
       case "fon.bet":
       case "pari.ru": {
-        isSuccess = !!findElementByProps(
+        const element = findElementByProps(
           elementData?.meta,
-          "[class*='cell']",
+          "[class*='factor']",
           "__reactFiber$",
-          ["return", "pendingProps", "cell", "factorId"]
+          {
+            factorId: ["return", "return", "pendingProps", "cell", "factorId"],
+            eventKind: [
+              "return",
+              "return",
+              "pendingProps",
+              "cell",
+              "eventKind",
+            ],
+          }
         );
+
+        if (!element?.classList.contains("selectedBet")) {
+          element?.classList.add("selectedBet");
+          const keyEl = document.createElement("div");
+
+          keyEl.id = "key";
+          keyEl.textContent = selectorKey;
+          element?.appendChild(keyEl);
+        }
+
+        isSuccess = !!element;
         break;
       }
       case "zenit.win": {
-        isSuccess = !!findElementByProps(
+        const el = findElementByProps(
           elementData.meta,
           "td",
           "__reactInternalInstance",
-          ["return", "pendingProps", "cfID"]
+          { factorId: ["return", "pendingProps", "cfID"] }
         );
+
+        if (!el?.classList.contains("selectedBet")) {
+          el?.classList.add("selectedBet");
+          const keyEl = document.createElement("div");
+
+          keyEl.id = "key";
+          keyEl.textContent = selectorKey;
+          if (!el?.querySelector("#key")) el?.appendChild(keyEl);
+        }
+
+        isSuccess = !!el;
       }
       default: {
       }
@@ -121,6 +160,8 @@ window.addEventListener("message", (event) => {
     }
   } else if (event.data.action === "clearSelectors") {
     for (const key in selectors) {
+      selectors[key]?.el?.classList.remove("selectedBet");
+      selectors[key]?.el?.querySelector("#key")?.remove();
       selectors[key] = null;
     }
   } else if (event.data.action === "setSum") {
@@ -165,7 +206,13 @@ document.addEventListener(
           if (el) {
             selectors[activeSelector] = {
               el: el as HTMLElement,
-              meta: getNestedReactFiberProperty(el.dataset, "coeffUuid", []),
+              meta: {
+                factorId: getNestedReactFiberProperty(
+                  el.dataset,
+                  "coeffUuid",
+                  []
+                ),
+              },
             };
           }
           break;
@@ -173,31 +220,47 @@ document.addEventListener(
 
         case "fon.bet":
         case "pari.ru": {
-          const el = target.closest("[class*='cell']");
+          const el = target.closest("[class*='factor']");
+
+          const meta = {
+            factorId: getNestedReactFiberProperty(el, "__reactFiber$", [
+              "return",
+              "return",
+              "pendingProps",
+              "cell",
+              "factorId",
+            ]),
+            eventKind: getNestedReactFiberProperty(el, "__reactFiber$", [
+              "return",
+              "return",
+              "pendingProps",
+              "cell",
+              "eventKind",
+            ]),
+          };
           if (el) {
             selectors[activeSelector] = {
               el: el as HTMLElement,
-              meta: getNestedReactFiberProperty(el, "__reactFiber$", [
-                "return",
-                "pendingProps",
-                "cell",
-                "factorId",
-              ]),
+              meta: meta,
             };
           }
           break;
         }
         case "zenit.win": {
           const el = target.closest("td");
+          const meta = {
+            factorId: getNestedReactFiberProperty(
+              el,
+              "__reactInternalInstance",
+              ["return", "pendingProps", "cfID"]
+            ),
+          };
           if (!el) return;
           selectors[activeSelector] = {
             el: el,
-            meta: getNestedReactFiberProperty(el, "__reactInternalInstance", [
-              "return",
-              "pendingProps",
-              "cfID",
-            ]),
+            meta,
           };
+
           break;
         }
       }

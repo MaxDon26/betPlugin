@@ -12,7 +12,7 @@ window.addEventListener("message", (event) => {
 
   if (event.data.action === "saveSelector") {
     removeCursorCircle();
-    console.log(event.data);
+
     if (!event.data.data) return;
     (
       document.querySelector(`#${event.data.data}`) as HTMLButtonElement
@@ -31,7 +31,7 @@ window.addEventListener("message", (event) => {
 init();
 
 let sumInput: null | HTMLInputElement = null;
-
+let indicator: null | HTMLDivElement = null;
 channelAction((message) => {
   window.postMessage(
     {
@@ -43,8 +43,24 @@ channelAction((message) => {
     },
     "*"
   );
-});
+}, "new-message");
+let inactiveTimeout: number | null = null;
+// пингуем сокет
+channelAction((message) => {
+  indicator?.classList.add("active");
+  indicator?.classList.remove("inactive");
 
+  // Убедимся, что предыдущий таймер на 10 секунд очищен
+  if (inactiveTimeout) clearTimeout(inactiveTimeout);
+
+  inactiveTimeout = setTimeout(() => {
+    indicator?.classList.add("inactive");
+  }, 10000);
+
+  setTimeout(() => {
+    indicator?.classList.remove("active");
+  }, 1000);
+}, "ping");
 const trigger = (selector: "GOAL__P1" | "GOAL__P2" | "SUBMIT") => {
   addCursorCircle();
 
@@ -53,13 +69,23 @@ const trigger = (selector: "GOAL__P1" | "GOAL__P2" | "SUBMIT") => {
 
 function generatePopup() {
   document.addEventListener("DOMContentLoaded", () => {
+    indicator = createElement("div", { className: "indicator" });
     const pupup = document.createElement("div");
+    pupup.appendChild(indicator);
     pupup.id = "popup";
     pupup.className = "pupup-container";
     document.body.appendChild(pupup);
 
     const containerButton = createElement("div", {
       className: "container-btn",
+    });
+    const goal1 = createButton("ГОЛ П1", {
+      id: "GOAL__P1",
+      onclick: () => trigger("GOAL__P1"),
+    });
+    const goal2 = createButton("ГОЛ П2", {
+      id: "GOAL__P2",
+      onclick: () => trigger("GOAL__P2"),
     });
 
     const labelOnlyP1 = createElement("label", {
@@ -70,24 +96,19 @@ function generatePopup() {
       type: "checkbox",
       id: "ONLY_P1",
       className: "only-p1",
+      onchange: () => {
+        goal2.classList.toggle("inactive");
+      },
     });
 
-    const goal1 = createButton("ГОЛ П1", {
-      id: "GOAL__P1",
-      onclick: () => trigger("GOAL__P1"),
-    });
-    const goal2 = createButton("ГОЛ П2", {
-      id: "GOAL__P2",
-      onclick: () => trigger("GOAL__P2"),
-    });
-
-    const clearBtn = createButton("Сбросить", {
+    const clearBtn = createButton("X", {
       onclick: () => {
         window.postMessage({ action: "clearSelectors" }, "*");
         [goal1, goal2].forEach((el) => {
           el.disabled = false;
           el.classList.remove("active");
         });
+        onlyP1.checked && onlyP1.click();
       },
       className: "clear",
     });
@@ -142,8 +163,8 @@ function generatePopup() {
 
     labelSum.append(sumInput, submit);
 
-    pupup.append(containerButton, clearBtn, labelSum, btnsOneClickContainer);
-    containerButton.append(goal1, goal2);
+    pupup.append(containerButton, labelSum, btnsOneClickContainer);
+    containerButton.append(goal1, goal2, clearBtn);
   });
 }
 

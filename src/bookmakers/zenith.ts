@@ -1,10 +1,8 @@
 function zenithRequest(element: any, meta: any) {
-  const el = findElementByProps(element.meta, "td", "__reactInternalInstance", [
-    "return",
-    "pendingProps",
-    "cfID",
-  ]);
-
+  const el = findElementByProps(element.meta, "td", "__reactInternalInstance", {
+    factorId: ["return", "pendingProps", "cfID"],
+  });
+  console.log(el);
   if (!el) return;
   el.querySelector("a")!.click();
   trySetInputValue(".basket-item-sum input", meta.sumBet, () =>

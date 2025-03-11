@@ -46,7 +46,25 @@ body {
 h3 {
   color: #10387c;
 }
+.indicator {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: #63666c;
 
+  transition: 0.3s ease-in-out;
+
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.indicator.active {
+  background-color: #08de21;
+}
+.indicator.inactive {
+  background-color: #d21403;
+}
 .pupup-container button {
   background-color: #1a3da8;
   color: white;
@@ -95,6 +113,10 @@ h3 {
   background-color: #02fd9c;
   font-weight: bold;
 }
+.container-btn button.inactive {
+  background-color: #9b1102;
+  font-weight: bold;
+}
 
 .saved-elements button:hover {
   background-color: #3659b1;
@@ -102,7 +124,8 @@ h3 {
 
 .pupup-container .clear {
   margin-top: 10px;
-  width: 100%;
+  min-width: 50px !important;
+  height: 50px !important;
   background-color: #f44336;
   color: white;
   border: none;
@@ -164,4 +187,8 @@ h3 {
   padding: 25px;
   font-weight: 700;
   font-size: 24px;
+}
+
+.selectedBet {
+  border: 2px solid #02fd9c !important;
 }

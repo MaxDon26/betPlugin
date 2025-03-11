@@ -21,28 +21,26 @@ function getNestedReactFiberProperty(
 }
 
 function findElementByProps(
-  meta: string,
-  parentSelector: string,
+  meta: Record<string, string>,
+  selector: string,
   keyPrefix: string,
-  propertyPath: string[],
-  elementProperty: keyof HTMLElement | null = null,
-  targetElement?: string
+  propertyPath: Record<string, string[]>
+  // elementProperty: keyof HTMLElement | null = null,
+  // targetElement?: string
 ): HTMLElement | null {
   return (
     Array.from(
-      document.querySelectorAll(parentSelector) as NodeListOf<HTMLElement>
+      document.querySelectorAll(selector) as NodeListOf<HTMLElement>
     ).find((item) => {
-      const parent = item.closest(
-        targetElement || parentSelector
-      ) as HTMLElement;
-      if (!parent) return false;
+      return Object.entries(meta).every(([key, val]) => {
+        const value = getNestedReactFiberProperty(
+          item,
+          keyPrefix,
+          propertyPath[key]
+        );
 
-      const value = getNestedReactFiberProperty(
-        elementProperty ? (parent[elementProperty] as any) : parent,
-        keyPrefix,
-        propertyPath
-      );
-      return value?.includes(meta);
+        return value === val;
+      });
     }) || null
   );
 }
@@ -59,7 +57,6 @@ function simulateClick(x: number, y: number) {
   const element = document.elementFromPoint(x, y);
   if (element) {
     element.dispatchEvent(clickEvent);
-    console.log(`✅ Клик выполнен по элементу:`, element);
   } else {
     console.warn(`❌ Нет элементов в координатах (${x}, ${y})`);
   }

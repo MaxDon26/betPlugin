@@ -26,5 +26,12 @@ app.post("/send-message", (req, res) => {
   res.json({ success: true, message: "Сообщение отправлено!" });
 });
 
+app.get("/ping", (req, res) => {
+  // Отправляем событие в Pusher
+  pusher.trigger("chat", "ping", { timestamp: Date.now() });
+
+  res.json({ success: true, message: "pong" });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Сервер запущен на порту ${PORT}`));

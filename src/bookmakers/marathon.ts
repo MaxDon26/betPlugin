@@ -2,11 +2,11 @@ function marathonRequest(element: any, meta: any) {
   const isOneClick = (
     document.querySelector('input[name="checked"]') as HTMLInputElement
   )?.checked;
-  const lastDashIndex = element?.meta.lastIndexOf("-");
+  const lastDashIndex = element?.meta.factorId.lastIndexOf("-");
   const id =
     lastDashIndex !== -1
-      ? element?.meta.slice(0, lastDashIndex)
-      : element?.meta;
+      ? element?.meta.factorId.slice(0, lastDashIndex)
+      : element?.meta.factorId;
   const now = new Date().getTime();
   if (isOneClick) {
     trySetInputValue("#b1c-stake", meta.sumBet, () => {
@@ -16,28 +16,20 @@ function marathonRequest(element: any, meta: any) {
         ) as HTMLButtonElement;
 
         if (saveSum) saveSum.click();
-        const elementHTML = findElementByProps(
-          id,
-          ".price",
-          "coeffUuid",
-          [],
-          "dataset"
-        );
+        const elementHTML = document.querySelector(
+          `[data-coeff-uuid*="${id}"]`
+        ) as HTMLElement;
         if (!elementHTML) return;
         const time = new Date().getTime() - now;
-        console.log(time);
+
         elementHTML.focus();
         elementHTML?.click();
       }, 0);
     });
   } else {
-    const elementHTML = findElementByProps(
-      id,
-      ".price",
-      "coeffUuid",
-      [],
-      "dataset"
-    );
+    const elementHTML = document.querySelector(
+      `[data-coeff-uuid*="${id}"]`
+    ) as HTMLElement;
     if (!elementHTML) return;
 
     elementHTML?.click();

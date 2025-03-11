@@ -14,15 +14,24 @@ function fonbetRequest(element: any, meta: any) {
           element?.meta,
           "[class*='factor']",
           "__reactFiber$",
-          ["return", "pendingProps", "cell", "factorId"],
-          null,
-          "[class*='cell']"
+          {
+            factorId: ["return", "return", "pendingProps", "cell", "factorId"],
+            eventKind: [
+              "return",
+              "return",
+              "pendingProps",
+              "cell",
+              "eventKind",
+            ],
+          }
+          // null,
+          // null,
+          // "[class*='cell']"
         );
 
         if (!elementHTML) return;
         const time = new Date().getTime() - now;
 
-        console.log(time);
         // document.body.focus();
         // document.body.click();
 
@@ -35,9 +44,9 @@ function fonbetRequest(element: any, meta: any) {
       element?.meta,
       "[class*='factor']",
       "__reactFiber$",
-      ["return", "pendingProps", "cell", "factorId"],
-      null,
-      "[class*='cell']"
+      { factorId: ["return", "pendingProps", "cell", "factorId"] }
+      // null,
+      // "[class*='cell']"
     );
 
     if (!elementHTML) return;
@@ -49,14 +58,12 @@ function fonbetRequest(element: any, meta: any) {
       if (submitBtn && !submitBtn.className.includes("disabled")) {
         const time = new Date().getTime() - now;
 
-        console.log(time);
         submitBtn.click();
       }
     });
   }
 }
 
-console.log("object");
 const waitForElement = (selector: string, timeout = 5000, interval = 200) => {
   return new Promise((resolve, reject) => {
     const startTime = Date.now();
@@ -66,7 +73,6 @@ const waitForElement = (selector: string, timeout = 5000, interval = 200) => {
 
       if (element) {
         resolve(element);
-        console.log(element);
       } else if (Date.now() - startTime >= timeout) {
         reject(new Error(`Элемент не найден за ${timeout / 1000} секунд`));
       } else {
@@ -81,8 +87,6 @@ const waitForElement = (selector: string, timeout = 5000, interval = 200) => {
 waitForElement('[data-component-part="toggle"]')
   .then((element) => {
     (element as HTMLDivElement).click();
-
-    console.log("click");
 
     // waitForElement("#betPlacingModeRadio_Any")
     //   .then((element) => {
