@@ -1,14 +1,18 @@
 import React, { useEffect } from "react";
 import "./App.css"; // Подключаем стили
+import { useApiRequest } from "./hooks/useApiRequest";
+import { useSession } from "./hooks/useSession";
 
 const Admin: React.FC = () => {
   // Функция отправки команды
+  const sessionId = useSession();
+  const { sendRequest } = useApiRequest(sessionId);
   const sendCommand = async (command: string) => {
     try {
-      await fetch("http://localhost:5000/send-message", {
+      await sendRequest({
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: command, send: Date.now() }),
+        url: "http://localhost:5002/send-message",
+        data: JSON.stringify({ message: command, send: Date.now() }),
       });
     } catch (error) {
       console.error("❌ Ошибка отправки команды:", error);
@@ -17,7 +21,7 @@ const Admin: React.FC = () => {
 
   useEffect(() => {
     const clear = setInterval(() => {
-      fetch("http://localhost:5000/ping");
+      sendRequest({ url: "http://localhost:5002/ping" });
     }, 3000);
 
     return () => clearInterval(clear);
