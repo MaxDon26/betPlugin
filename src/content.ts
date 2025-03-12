@@ -1,7 +1,9 @@
 import { createButton, createElement } from "./pages/popupFile";
 import { addCursorCircle, removeCursorCircle } from "./components/circle";
 import { channelAction } from "./api";
-
+// сделать маленькие кнопки сумм и больше
+// очищать селектор
+// сделать привязку к машине для пинга
 import "./content.css";
 
 // // Ловим сообщения от ejcet и пересылаем их в background.js
