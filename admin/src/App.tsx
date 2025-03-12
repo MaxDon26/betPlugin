@@ -13,6 +13,9 @@ const Admin: React.FC = () => {
         method: "POST",
         url: "http://localhost:5002/send-message",
         data: JSON.stringify({ message: command, send: Date.now() }),
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
     } catch (error) {
       console.error("❌ Ошибка отправки команды:", error);
@@ -25,7 +28,7 @@ const Admin: React.FC = () => {
     }, 3000);
 
     return () => clearInterval(clear);
-  }, []);
+  }, [sessionId]);
 
   return (
     <div className="admin-container">

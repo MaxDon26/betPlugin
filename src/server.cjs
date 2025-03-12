@@ -40,11 +40,11 @@ const pusher = new Pusher({
 app.post("/send-message", (req, res) => {
   const incomingSessionId = req.headers["x-session-id"];
   // Отправляем событие в Pusher
-  console.log(req.headers);
-  if (!incomingSessionId === activeSessionId)
+  console.log(incomingSessionId, activeSessionId);
+  if (!(incomingSessionId === activeSessionId))
     return res.status(401).json({ message: "no auth" });
   // Отправляем событие в Pusher
-  // pusher.trigger("chat", "new-message", req.body);
+  pusher.trigger("chat", "new-message", req.body);
 
   res.json({ success: true, message: "Сообщение отправлено!" });
 });
@@ -52,7 +52,7 @@ app.post("/send-message", (req, res) => {
 app.get("/ping", (req, res) => {
   const incomingSessionId = req.headers["x-session-id"];
   // Отправляем событие в Pusher
-  if (!incomingSessionId === activeSessionId)
+  if (!(incomingSessionId === activeSessionId))
     return res.status(401).json({ message: "no auth" });
   pusher.trigger("chat", "ping", { timestamp: Date.now() });
 

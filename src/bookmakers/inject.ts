@@ -5,7 +5,7 @@ const selectors: Record<string, { el: HTMLElement; meta: any } | null> = {
 
 let isSelectorMode = false;
 let activeSelector: keyof typeof selectors | null = null;
-let interval: number | null = null;
+let interval: any | null = null;
 let isOneClick = false;
 
 // Функция для очистки интервала
@@ -27,7 +27,13 @@ const checkSelectors = () => {
     clearSelectorInterval();
     return;
   }
+  document.querySelectorAll(".selectedBet").forEach((item) => {
+    item.classList.remove("selectedBet");
+  });
 
+  document.querySelectorAll("#key").forEach((item) => {
+    item.remove();
+  });
   activeEntries.forEach(([selectorKey, elementData]) => {
     if (!elementData) return;
 
@@ -75,13 +81,21 @@ const checkSelectors = () => {
           }
         );
 
+        // document.querySelectorAll(".selectedBet").forEach((item) => {
+        //   item.classList.remove("selectedBet");
+        // });
+
+        // document.querySelectorAll("#key").forEach((item) => {
+        //   item.remove();
+        // });
+
         if (!element?.classList.contains("selectedBet")) {
           element?.classList.add("selectedBet");
           const keyEl = document.createElement("div");
 
           keyEl.id = "key";
           keyEl.textContent = selectorKey;
-          element?.appendChild(keyEl);
+          if (!element?.querySelector("#key")) element?.appendChild(keyEl);
         }
 
         isSuccess = !!element;
@@ -138,7 +152,7 @@ window.addEventListener("message", (event) => {
     const onlyP1 = (document.querySelector("#ONLY_P1") as HTMLInputElement)
       .checked;
     const element = selectors[onlyP1 ? "GOAL__P1" : event.data.data];
-
+    console.log(element);
     if (!element || !element.el || !element.meta) return;
 
     const meta: { sumBet: string } = event.data.meta || {};
@@ -160,8 +174,13 @@ window.addEventListener("message", (event) => {
     }
   } else if (event.data.action === "clearSelectors") {
     for (const key in selectors) {
-      selectors[key]?.el?.classList.remove("selectedBet");
-      selectors[key]?.el?.querySelector("#key")?.remove();
+      document.querySelectorAll(".selectedBet").forEach((item) => {
+        item.classList.remove("selectedBet");
+      });
+
+      document.querySelectorAll("#key").forEach((item) => {
+        item.remove();
+      });
       selectors[key] = null;
     }
   } else if (event.data.action === "setSum") {
@@ -197,12 +216,12 @@ document.addEventListener(
       event.preventDefault();
       event.stopImmediatePropagation();
 
-      selectors[activeSelector] = { el: target, meta: null };
       isSelectorMode = false;
 
       switch (window.location.host) {
         case "www.marathonbet.ru": {
           const el = target.closest("td");
+
           if (el) {
             selectors[activeSelector] = {
               el: el as HTMLElement,

@@ -46,7 +46,7 @@ channelAction((message) => {
     "*"
   );
 }, "new-message");
-let inactiveTimeout: number | null = null;
+let inactiveTimeout: any | null = null;
 // пингуем сокет
 channelAction((message) => {
   indicator?.classList.add("active");
@@ -153,7 +153,7 @@ function generatePopup() {
     });
 
     btnsOneClickContainer.append(
-      ...[5000, 10000, 15000].map((sum) =>
+      ...[1000, 2000, 3000, 5000, 7000, 10000, 12000, 15000].map((sum) =>
         createButton(`${sum} руб`, {
           onclick: () => {
             window.postMessage({ action: "setSum", data: sum }, "*");

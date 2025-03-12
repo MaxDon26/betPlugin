@@ -17,7 +17,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-
+  max-width: 450px;
   flex-direction: column;
 
   gap: 10px;
@@ -180,13 +180,16 @@ h3 {
 .btns-one-click-container {
   display: flex;
   gap: 10px;
-  justify-content: space-between;
+  justify-content: flex-start;
   width: 100%;
+  flex-wrap: wrap;
 }
 .pupup-container .btn-one-click {
-  padding: 25px;
+  padding: 10px;
   font-weight: 700;
-  font-size: 24px;
+  font-size: 12px;
+
+  max-width: 60px;
 }
 
 .selectedBet {
